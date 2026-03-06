@@ -29,6 +29,7 @@ async fn handle(
 ) -> Result<Response<BoxBody<Bytes, hyper::Error>>, hyper::Error> {
     match request.uri().path() {
         "/" => hello(request).await,
+        "/health_check" => health_check(request).await,
         _ => not_found(request).await,
     }
 }
@@ -37,6 +38,10 @@ async fn hello(
     _: Request<hyper::body::Incoming>,
 ) -> Result<Response<BoxBody<Bytes, hyper::Error>>, hyper::Error> {
     Ok(Response::new(full("Hello")))
+}
+
+async fn health_check(_: Request<hyper::body::Incoming>) ->Result<Response<BoxBody<Bytes, hyper::Error>>, hyper::Error> {
+    Ok(Response::new(full("Healthy")))
 }
 
 async fn not_found(
