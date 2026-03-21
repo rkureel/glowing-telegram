@@ -1,15 +1,16 @@
 use std::io::Error;
-use std::net::SocketAddr;
+use std::net::TcpListener;
 
 use http_body_util::BodyExt;
 use http_body_util::{Empty, Full, combinators::BoxBody};
 use hyper::{Request, Response, StatusCode, body::Bytes, server::conn::http1, service::service_fn};
 use hyper_util::rt::TokioIo;
-use tokio::net::TcpListener;
 
-pub async fn run_server() -> Result<(), Error> {
-    let addr = SocketAddr::from(([127, 0, 0, 1], 8000));
-    let listener = TcpListener::bind(addr).await?;
+pub async fn run_server(std_listener: TcpListener) -> Result<(), Error> {
+    std_listener
+        .set_nonblocking(true)
+        .expect("Cannot set non-blocking");
+    let listener: tokio::net::TcpListener = tokio::net::TcpListener::from_std(std_listener)?;
     loop {
         let (stream, _) = listener.accept().await?;
         let io = TokioIo::new(stream);
